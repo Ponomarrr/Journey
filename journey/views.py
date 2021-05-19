@@ -3,5 +3,5 @@ from django.shortcuts import render
 
 
 def home(request):
-    name = 'Python Journey!!!'
+    name = 'Are you ready to travel?!!!'
     return render(request, 'home.html', {'name': name})
