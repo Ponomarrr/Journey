@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from cities.models import City
 
@@ -20,6 +21,22 @@ class Train(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self, *args, **kwargs):
+        if self.from_city == self.to_city:
+            raise ValidationError('Измените город прибытия')
+
+        qs = Train.objects.filter(from_city=self.from_city,
+                                  to_city=self.to_city,
+                                  travel_time=self.travel_time).exclude(pk=self.pk)
+        # Train == self.__class__
+        if qs.exists():
+            raise ValidationError('Измените время в пути')
+
+    def save(self, *args, **kwargs):
+        self.clean()
+
+        super().save(*args, **kwargs)
 
 
 class TrainTest(models.Model):

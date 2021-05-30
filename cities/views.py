@@ -56,10 +56,9 @@ class CityDeleteView(DeleteView):
     model = City
     # template_name = 'cities/delete.html'
     success_url = reverse_lazy('cities:home')
-    success_message = 'Город успешно удален!'
 
     def get(self, request, *args, **kwargs):
-        messages.success(self.request, self.success_message)
+        messages.success(request, 'Город успешно удален!')
         return self.post(request, *args, **kwargs)
 
 
