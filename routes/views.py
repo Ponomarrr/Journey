@@ -1,7 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from routes.forms import RouteForm
+from django.views.generic import DetailView, ListView
+
+from cities.models import City
+from routes.forms import RouteForm, RouteModelForm
+from routes.models import Route
 from routes.utils import get_routes
+from trains.models import Train
 
 
 def home(request):
@@ -25,3 +30,55 @@ def find_routes(request):
         messages.error(request, 'Создайте маршрут')
         form = RouteForm()
         return render(request, 'routes/home.html', {'form': form})
+
+
+def add_route(request):
+    if request.method == 'POST':
+        data = request.POST
+        context = {}
+        if data:
+            total_time = int(data['total_time'])
+            from_city_id = int(data['from_city'])
+            to_city_id = int(data['to_city'])
+            trains = data['trains'].split(',')
+            trains_lst = [int(t) for t in trains if t.isdigit()]
+            qs = Train.objects.filter(id__in=trains_lst).select_related('from_city', 'to_city')
+            cities = City.objects.filter(id__in=[from_city_id, to_city_id]).in_bulk()
+            form = RouteModelForm(
+                initial={
+                    'from_city': cities[from_city_id],
+                    'to_city': cities[to_city_id],
+                    'travel_times': total_time,
+                    'trains': qs
+                }
+            )
+            context['form'] = form
+        return render(request, 'routes/create.html', context)
+    else:
+        # защита от обращения по адресу без данных
+        messages.error(request, 'Невозможно сохранить несуществующий маршрут')
+        return redirect('/')
+
+
+def save_route(request):
+    if request.method == "POST":
+        form = RouteModelForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Маршрут успешно сохранен")
+            return redirect('/')
+        return render(request, 'routes/create.html', {'form': form})
+    else:
+        messages.error(request, "Невозможно сохранить несуществующий маршрут")
+        return redirect('/')
+
+
+class RouteDetailView(DetailView):
+    queryset = Route.objects.all().select_related('from_city', 'to_city')
+    template_name = 'routes/detail.html'
+
+
+class RouteListView(ListView):
+    queryset = Route.objects.all().select_related('from_city', 'to_city').prefetch_related('trains')
+    template_name = 'routes/list.html'
+    paginate_by = 2

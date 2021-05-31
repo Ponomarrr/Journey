@@ -34,7 +34,7 @@
                href="{% url 'trains:home' %}">Поезда</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Pricing</a>
+            <a class="nav-link" href='{% url "list"%}'>Маршруты</a>
           </li>
           <li class="nav-item dropdown
               {% if request.path == train_add_url or request.path == city_add_url %}
