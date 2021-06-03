@@ -12,16 +12,21 @@
                 <td>
                 <a href='{% url "cities:details" pk=object.pk%}'> {{object.name}} </a>
                 </td>
-                <td>
-                <a href='{% url "cities:update" pk=object.pk%}'>
-                <button type="button" class="btn btn-primary btn-sm"> Редактировать </button>
-                </a>
-                </td>
-                <td>
-                <a href='{% url "cities:delete" pk=object.pk%}'>
-                <button type="button" class="btn btn-danger btn-sm"> Удалить </button>
-                </a>
-                </td>
+                    {% if user.is_authenticated %}
+                        <td>
+                            <a href='{% url "cities:update" pk=object.pk%}'>
+                                <button type="button" class="btn btn-primary btn-sm"> Редактировать </button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href='{% url "cities:delete" pk=object.pk%}'>
+                                <button type="button" class="btn btn-danger btn-sm"> Удалить </button>
+                            </a>
+                        </td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>
@@ -41,15 +46,13 @@
         {% endif %}
     </li>
 
-    <li class="page-item active">
-        <a class="page-link" href="?page={{ page_obj.number }}">{{ page_obj.number }}</a>
-    </li>
-
-       {% if page_obj.number < page_obj.paginator.num_pages %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-            </li>
-        {% endif %}
+    {% for page in page_obj.paginator.page_range %}
+        <li class="page-item {% if page == page_obj.number %} active {% endif %} ">
+            <a class="page-link" href="?page={{page}}">
+                {{ page }}
+            </a>
+        </li>
+    {% endfor %}
 
     <li class="page-item">
         {% if page_obj.has_next %}
@@ -62,14 +65,15 @@
   </ul>
 </nav>
 
-
-<div class="row">
-    <div class="col-4">
-        <form action="{% url 'cities:add' %}" method="post"> {% csrf_token %}
-            {{form.as_p}}
-            <br>
-            <input type="submit" value="Сохранить">
-        </form>
+{% if user.is_authenticated %}
+    <div class="row">
+        <div class="col-4">
+            <form action="{% url 'cities:add' %}" method="post"> {% csrf_token %}
+                {{form.as_p}}
+                <br>
+                <input type="submit" value="Сохранить">
+            </form>
+        </div>
     </div>
-</div>
+{% endif %}
 {% endblock content %}

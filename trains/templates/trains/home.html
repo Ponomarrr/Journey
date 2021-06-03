@@ -23,18 +23,22 @@
                         <td>{{object.from_city}}</td>
                         <td>{{object.to_city}}</td>
                         <td>{{object.travel_time}}</td>
+                        {% if user.is_authenticated %}
+                                <td>
+                                    <a href='{% url "trains:update" pk=object.pk%}'>
+                                    <button type="button" class="btn btn-primary btn-sm"> Редактировать </button>
+                                    </a>
+                                </td>
 
-                        <td>
-                            <a href='{% url "trains:update" pk=object.pk%}'>
-                            <button type="button" class="btn btn-primary btn-sm"> Редактировать </button>
-                            </a>
-                        </td>
-
-                        <td>
-                            <a href='{% url "trains:delete" pk=object.pk%}'>
-                            <button type="button" class="btn btn-danger btn-sm"> Удалить </button>
-                            </a>
-                        </td>
+                                <td>
+                                    <a href='{% url "trains:delete" pk=object.pk%}'>
+                                    <button type="button" class="btn btn-danger btn-sm"> Удалить </button>
+                                    </a>
+                                </td>
+                        {% else %}
+                                <td></td>
+                                <td></td>
+                        {% endif %}
                     </tr>
             {% endfor %}
             </tbody>
@@ -53,15 +57,13 @@
         {% endif %}
     </li>
 
-    <li class="page-item active">
-        <a class="page-link" href="?page={{ page_obj.number }}"> {{ page_obj.number }}</a>
-    </li>
-
-       {% if page_obj.number < page_obj.paginator.num_pages %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-            </li>
-        {% endif %}
+    {% for page in page_obj.paginator.page_range %}
+        <li class="page-item {% if page == page_obj.number %} active {% endif %} ">
+            <a class="page-link" href="?page={{page}}">
+                {{ page }}
+            </a>
+        </li>
+    {% endfor %}
 
     <li class="page-item">
         {% if page_obj.has_next %}

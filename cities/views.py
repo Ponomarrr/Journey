@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
@@ -36,7 +37,8 @@ class CityDetailView(DetailView):
     template_name = 'cities/details.html'
 
 
-class CityCreateView(SuccessMessageMixin, CreateView):
+class CityCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
+    login_url = '/accounts/login/'
     model = City
     form_class = CityForm
     template_name = 'cities/create.html'
@@ -44,7 +46,8 @@ class CityCreateView(SuccessMessageMixin, CreateView):
     success_message = 'Город успешно создан!'
 
 
-class CityUpdateView(SuccessMessageMixin, UpdateView):
+class CityUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    login_url = '/accounts/login/'
     model = City
     form_class = CityForm
     template_name = 'cities/update.html'
@@ -52,7 +55,8 @@ class CityUpdateView(SuccessMessageMixin, UpdateView):
     success_message = 'Город успешно обновлен!'
 
 
-class CityDeleteView(DeleteView):
+class CityDeleteView(LoginRequiredMixin, DeleteView):
+    login_url = '/accounts/login/'
     model = City
     # template_name = 'cities/delete.html'
     success_url = reverse_lazy('cities:home')
